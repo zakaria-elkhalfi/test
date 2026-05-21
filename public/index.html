@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
+<title>MailFlow Pro | Premium Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  /* Premium Dark Palette */
+  --bg: #050508;
+  --surface: #0f0f15;
+  --surface-hover: #161620;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-bright: rgba(255, 255, 255, 0.15);
+  
+  --accent: #6366f1;
+  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --wa: #22c55e;
+  --wa-gradient: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --error: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top center, #1e1b4b) 0%, var(--bg) 70%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  background: var(--accent-gradient);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.login-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center; }
+.login-sub { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 2rem; text-align: center; font-family: var(--font-mono); }
+.login-err { background: rgba(239, 68, 68, 0.1); color: var(--error); padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; text-align: center; border: 1px solid rgba(239, 68, 68, 0.2); display: none; }
+
+/* ── HEADER ── */
+header {
+  height: 72px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5, 5, 8, 0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.03em; }
+.logo-icon { width: 34px; height: 34px; background: var(--accent-gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+.hdr-right { display: flex; align-items: center; gap: 12px; }
+.smtp-pill, .user-pill {
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.03);
+}
+.smtp-pill:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+.user-pill:hover { border-color: var(--error); color: var(--error); }
+
+.sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.sdot.ok { background: var(--success); box-shadow: 0 0 10px var(--success); }
+.sdot.err { background: var(--error); box-shadow: 0 0 10px var(--error); }
+
+/* ── LAYOUT ── */
+.app { display: flex; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 72px);
+  position: sticky;
+  top: 72px;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
+}
+
+.nav-section { margin-bottom: 2rem; }
+.nav-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.1em; padding: 0 12px; margin-bottom: 0.75rem; }
+.nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 2px;
+}
+.nav-item:hover { color: var(--text); background: var(--surface-hover); }
+.nav-item.active { background: rgba(99, 102, 241, 0.1); color: var(--text); border: 1px solid rgba(99, 102, 241, 0.2); }
+.nav-item.active.wa { background: rgba(34, 197, 94, 0.1); color: var(--wa); border-color: rgba(34, 197, 94, 0.2); }
+.nav-icon { font-size: 1.1rem; }
+
+/* ── MAIN CONTENT ── */
+.main { flex: 1; padding: 2.5rem; max-width: 1200px; margin: 0 auto; min-width: 0; }
+.page { display: none; animation: fadeIn 0.4s ease-out; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── STATS & CARDS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+.stat-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+.stat-card .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; }
+.stat-card .value { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.04em; }
+.stat-card .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-family: var(--font-mono); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.card-title { font-size: 0.85rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.card-body { padding: 1.5rem; }
+
+/* ── FORMS ── */
+.field { margin-bottom: 1.25rem; }
+label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
+input, textarea, select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  font-size: 0.9rem;
+}
+.btn-primary { background: var(--accent-gradient); color: white; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4); }
+.btn-wa { background: var(--wa-gradient); color: white; }
+.btn-wa:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.4); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+.btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
+.btn-danger:hover { background: var(--error); color: white; }
+.btn-full { width: 100%; }
+
+/* ── PROGRESS UI ── */
+.prog-track { height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 100px; overflow: hidden; margin: 1rem 0; }
+.prog-fill { height: 100%; width: 0%; transition: width 0.5s ease; }
+.prog-fill.email { background: var(--accent-gradient); }
+.prog-fill.wa { background: var(--wa-gradient); }
+
+/* ── WHATSAPP QR ── */
+.qr-box {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  margin: 1rem auto;
+  display: inline-block;
+}
+.qr-img { width: 220px; height: 220px; max-width: 100%; }
+.qr-ph { width: 220px; height: 220px; background: #f8fafc; border: 2px dashed #e2e8f0; color: #64748b; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 100%; }
+
+/* ── TABLES ── */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; min-width: 500px; } /* Ensure table doesn't squish too much */
+th { text-align: left; padding: 12px 16px; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+td { padding: 14px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--border); font-family: var(--font-mono); }
+tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+/* ── TOASTS ── */
+#toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 10000; display: flex; flex-direction: column; gap: 8px; max-width: 90vw; }
+.tmsg {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+  animation: slideLeft 0.3s ease;
+  border-left: 4px solid var(--accent);
+}
+.tmsg.success { border-left-color: var(--success); }
+.tmsg.error { border-left-color: var(--error); }
+.tmsg.wa { border-left-color: var(--wa); }
+
+@keyframes slideLeft { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+.badge.sent, .badge.enabled { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.badge.failed, .badge.disabled { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+
+/* Utils */
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 10px; }
+
+/* ── RESPONSIVE FIXES ── */
+@media (max-width: 1024px) {
+  .sidebar { width: 80px; padding: 1.5rem 0.5rem; }
+  .nav-label, .nav-item span:not(.nav-icon) { display: none; }
+  .nav-item { justify-content: center; padding: 12px; }
+}
+
+@media (max-width: 768px) {
+  header { padding: 0 1rem; }
+  .logo { font-size: 1.1rem; }
+  .smtp-pill span { display: none; } /* Hide "SMTP CHECK" text on mobile, keep icon/dot */
+  
+  .app { flex-direction: column; }
+  
+  /* Transform Sidebar to Bottom Navigation */
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    top: auto;
+    width: 100%;
+    height: 64px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-right: none;
+    z-index: 2000;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    overflow: hidden;
+  }
+  .nav-section { margin-bottom: 0; display: flex; width: 100%; justify-content: space-around; }
+  .nav-label { display: none; }
+  .nav-item { 
+    margin-bottom: 0; 
+    border-radius: 0; 
+    flex-direction: column; 
+    gap: 4px; 
+    padding: 8px; 
+    height: 100%;
+    font-size: 0.65rem;
+  }
+  .nav-item.active { border: none; background: rgba(99, 102, 241, 0.05); }
+  .nav-item .nav-icon { font-size: 1.25rem; margin-bottom: 2px; }
+  .nav-item span:not(.nav-icon) { display: block !important; } /* Re-enable labels for mobile bottom bar */
+
+  .main { 
+    padding: 1.5rem 1rem 100px 1rem; /* Extra bottom padding for bottom bar */
+  }
+  
+  .grid2 { grid-template-columns: 1fr; gap: 1rem; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  
+  .stat-card { padding: 1rem; }
+  .stat-card .value { font-size: 1.5rem; }
+  
+  .login-box { padding: 2rem 1.5rem; }
+  
+  #toast { bottom: 80px; right: 1rem; left: 1rem; } /* Toast above bottom bar */
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .hdr-right { gap: 6px; }
+  .user-pill span { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">✉</div>
+    <div class="login-title">MailFlow Pro</div>
+    <div class="login-sub">Advanced Multi-Channel Automation</div>
+    <div class="login-err" id="loginErr">Invalid credentials</div>
+    <div class="field"><label>Username</label><input type="text" id="loginUser" value="admin" /></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPass" value="admin123" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In to Dashboard →</button>
+    <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:1.5rem; font-family:var(--font-mono)">Default: admin / admin123</p>
+  </div>
+</div>
+
+<header>
+  <div class="logo"><div class="logo-icon">✉</div>MailFlow Pro</div>
+  <div class="hdr-right">
+    <div class="smtp-pill" onclick="testSMTP()"><div class="sdot" id="smtpDot"></div><span id="smtpLabel">SMTP CHECK</span></div>
+    <div class="user-pill" onclick="logout()">👤 <span id="userLabel">admin</span></div>
+  </div>
+</header>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="nav-section">
+      <button class="nav-item active" id="nav-stats" onclick="goPage('stats')"><span class="nav-icon">📊</span><span>Stats</span></button>
+      <button class="nav-item" id="nav-email" onclick="goPage('email')"><span class="nav-icon">✉</span><span>Email</span></button>
+      <button class="nav-item" id="nav-wa" onclick="goPage('wa')"><span class="nav-icon">💬</span><span>WA</span></button>
+      <button class="nav-item" id="nav-groups" onclick="goPage('groups')"><span class="nav-icon">👥</span><span>Groups</span></button>
+      <button class="nav-item" id="nav-scheduler" onclick="goPage('scheduler')"><span class="nav-icon">⏰</span><span>Jobs</span></button>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="page active" id="page-stats">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Emails</div>
+          <div class="value" id="sTotalSent" style="color:var(--success)">0</div>
+          <div class="sub">Delivered successfully</div>
+          <div class="chart-bar-wrap" id="chartEmailSent" style="display:flex; align-items:flex-end; gap:3px; height:40px; margin-top:10px"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Bounced</div>
+          <div class="value" id="sTotalFailed" style="color:var(--error)">0</div>
+          <div class="sub">Delivery errors</div>
+          <div class="chart-bar-wrap" id="chartEmailFailed" style="display:flex; align-items:flex-end; gap:3px; height:40px; margin-top:10px"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">WA Delivered</div>
+          <div class="value" id="sWASent" style="color:var(--wa)">0</div>
+          <div class="sub">WhatsApp messages</div>
+          <div class="chart-bar-wrap" id="chartWASent" style="display:flex; align-items:flex-end; gap:3px; height:40px; margin-top:10px"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">WA Failed</div>
+          <div class="value" id="sWAFailed" style="color:var(--error)">0</div>
+          <div class="sub">Messaging errors</div>
+          <div class="chart-bar-wrap" id="chartWAFailed" style="display:flex; align-items:flex-end; gap:3px; height:40px; margin-top:10px"></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent Email Activity</div><button class="btn btn-ghost" style="padding:4px 8px" onclick="loadEmailLogs()">↻</button></div>
+          <div class="tbl-wrap"><div id="statsEmailLog"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent WhatsApp Activity</div><button class="btn btn-ghost" style="padding:4px 8px" onclick="loadWALogs()">↻</button></div>
+          <div class="tbl-wrap"><div id="statsWALog"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-email">
+      <div class="progress-section" id="emailProg" style="display:none; margin-bottom:2rem">
+        <div class="card" style="border-color:var(--accent)">
+            <div class="card-body">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <span style="font-weight:700">Email Campaign Processing...</span>
+                    <span id="emailProgLabel" style="font-family:var(--font-mono)">0/0</span>
+                </div>
+                <div class="prog-track"><div class="prog-fill email" id="emailFill"></div></div>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center">
+                    <div><div style="color:var(--text-muted); font-size:0.7rem">TOTAL</div><div id="eT" style="font-weight:700">0</div></div>
+                    <div><div style="color:var(--success); font-size:0.7rem">SENT</div><div id="eS" style="font-weight:700">0</div></div>
+                    <div><div style="color:var(--error); font-size:0.7rem">FAILED</div><div id="eF" style="font-weight:700">0</div></div>
+                    <div><div style="color:var(--text-muted); font-size:0.7rem">REMAINING</div><div id="eL" style="font-weight:700">0</div></div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">1. Content & Template</div><span id="tplSaved" style="display:none; font-size:0.7rem; color:var(--success)">Saved</span></div>
+          <div class="card-body">
+            <div class="field"><label>Select Template</label><select id="emailTplSelect" onchange="loadSelectedTemplate()"></select></div>
+            <div class="field"><label>Subject Line</label><input type="text" id="subject" placeholder="Campaign Subject"/></div>
+            <div class="field"><label>HTML/Text Message</label><textarea id="message" style="height:200px" placeholder="Write your email here..."></textarea></div>
+            <div style="display:flex; gap:10px">
+              <button class="btn btn-primary" onclick="saveTemplate()">💾 Update</button>
+              <button class="btn btn-ghost" onclick="goPage('templates')">Library</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">2. Audience</div><span class="badge sent" id="emailCount" style="display:none">0</span></div>
+          <div class="card-body">
+            <div class="field">
+              <label>Import CSV</label>
+              <div style="border:2px dashed var(--border); border-radius:12px; padding:2rem; text-align:center; position:relative; cursor:pointer">
+                <input type="file" id="csvFile" accept=".csv,.txt" onchange="handleCSV(event)" style="position:absolute; inset:0; opacity:0"/>
+                <div style="font-size:2rem; margin-bottom:10px">📄</div>
+                <div style="font-weight:600">Drop your file here</div>
+                <div style="font-size:0.75rem; color:var(--text-muted)">One email per line</div>
+              </div>
+            </div>
+            <div class="field"><label>Manual Paste</label><textarea id="emailList" style="height:120px; font-family:var(--font-mono)" placeholder="user@example.com" oninput="updateCount('email')"></textarea></div>
+            <button class="btn btn-primary btn-full" id="emailSendBtn" onclick="sendEmails()">🚀 Initialize Campaign</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Delivery Logs</div><div style="display:flex; gap:8px"><button class="btn btn-ghost" onclick="loadEmailLogs()">↻</button><button class="btn btn-danger" onclick="clearEmailLogs()">Clear</button></div></div>
+        <div class="tbl-wrap"><div id="emailLog"></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-wa">
+      <div class="progress-section" id="waProg" style="display:none; margin-bottom:2rem">
+          <div class="card" style="border-color:var(--wa)">
+              <div class="card-body">
+                  <div style="display:flex; justify-content:space-between; align-items:center">
+                      <span style="font-weight:700">WhatsApp Broadcast Running...</span>
+                      <span id="waProgLabel" style="font-family:var(--font-mono)">0/0</span>
+                  </div>
+                  <div class="prog-track"><div class="prog-fill wa" id="waFill"></div></div>
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; text-align:center">
+                      <div><div style="color:var(--text-muted); font-size:0.7rem">TOTAL</div><div id="wT" style="font-weight:700">0</div></div>
+                      <div><div style="color:var(--wa); font-size:0.7rem">SENT</div><div id="wS" style="font-weight:700">0</div></div>
+                      <div><div style="color:var(--error); font-size:0.7rem">FAILED</div><div id="wF" style="font-weight:700">0</div></div>
+                      <div><div style="color:var(--text-muted); font-size:0.7rem">REMAINING</div><div id="wL" style="font-weight:700">0</div></div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Connection Status</div><div class="badge" id="waBadge"><span id="waTxt">disconnected</span></div></div>
+          <div class="card-body" style="text-align:center">
+            <div id="qrPh" class="qr-ph" style="margin: 0 auto">
+                <div style="font-size:2rem">📱</div>
+                <strong>Not Linked</strong>
+            </div>
+            <div class="qr-box" id="qrImgContainer" style="display:none">
+                <img id="qrImg" class="qr-img" />
+            </div>
+            <div id="waInstr" style="display:none; background:rgba(255,255,255,0.05); padding:1rem; border-radius:10px; margin-top:1rem; font-size:0.8rem; text-align:left">
+                1. Open WhatsApp<br>2. Linked Devices > Link a Device<br>3. Scan QR Code
+            </div>
+            <div style="margin-top:1.5rem; display:flex; gap:10px; justify-content:center">
+                <button class="btn btn-wa" id="waConnBtn" onclick="waConnect()">Link WhatsApp</button>
+                <button class="btn btn-danger" id="waDiscBtn" style="display:none" onclick="waDisconnect()">Disconnect</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Messaging</div><span class="badge sent" id="numCount" style="display:none">0</span></div>
+          <div class="card-body">
+            <div class="field"><label>Message Template</label><textarea id="waMsg" style="height:120px" placeholder="Hello {{name}}..."></textarea></div>
+            <div class="field"><label>Recipients</label><textarea id="waNumbers" style="height:120px; font-family:var(--font-mono)" placeholder="+212..." oninput="updateCount('wa')"></textarea></div>
+            <button class="btn btn-wa btn-full" id="waSendBtn" onclick="sendWA()">💬 Start Broadcast</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+          <div class="card-header"><div class="card-title">WA Delivery Log</div><div style="display:flex; gap:8px"><button class="btn btn-ghost" onclick="loadWALogs()">↻</button><button class="btn btn-danger" onclick="clearWALogs()">Clear</button></div></div>
+          <div class="tbl-wrap"><div id="waLog"></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-templates">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Template Library</div><button class="btn btn-primary" style="padding:6px 12px" onclick="newTemplate()">+ New</button></div>
+                <div class="card-body"><div id="tplList" style="display:flex; flex-direction:column; gap:8px"></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Editor</div><button class="btn btn-danger" id="deleteTplBtn" style="display:none; padding:6px 12px" onclick="deleteTemplate()">Delete</button></div>
+                <div class="card-body">
+                    <div class="field"><label>Name</label><input type="text" id="tplName" placeholder="Welcome Email"/></div>
+                    <div class="field"><label>Subject</label><input type="text" id="tplSubject" placeholder="Subject line..."/></div>
+                    <div class="field"><label>HTML Content</label><textarea id="tplMessage" style="height:250px"></textarea></div>
+                    <button class="btn btn-primary btn-full" onclick="saveTplEdit()">Save Template Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="page-groups">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-header"><div class="card-title">WhatsApp Groups</div><button class="btn btn-ghost" onclick="loadGroups()">↻ Refresh</button></div>
+                <div class="card-body">
+                    <div id="groupList"></div>
+                    <div id="groupSelected" style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted)"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Broadcast Message</div></div>
+                <div class="card-body">
+                    <div class="field"><label>Message Content</label><textarea id="groupMsg" style="height:200px" placeholder="Compose group message..."></textarea></div>
+                    <button class="btn btn-wa btn-full" onclick="sendToGroups()">Send to Selected Groups</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="page-scheduler">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Active Cron Jobs</div></div>
+                <div class="card-body"><div id="jobList"></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Create Schedule</div></div>
+                <div class="card-body">
+                    <div class="field"><label>Task Name</label><input type="text" id="jobName"/></div>
+                    <div class="field"><label>Channel</label><select id="jobType"><option value="email">Email</option><option value="whatsapp">WhatsApp</option></select></div>
+                    <div class="field"><label>Template</label><select id="jobTemplate"></select></div>
+                    <div class="field"><label>Cron Schedule</label><input type="text" id="jobCron" placeholder="0 9 * * *"/><div style="font-size:0.65rem; color:var(--text-muted); margin-top:4px">Min Hour Day Month Week</div></div>
+                    <div class="field"><label>Recipient List</label><textarea id="jobRecipients" style="height:80px"></textarea></div>
+                    <button class="btn btn-primary btn-full" onclick="addJob()">Schedule Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let TOKEN = localStorage.getItem('mf_token') || '';
+let sendingEmail = false, sendingWA = false;
+let eStats = {total:0,sent:0,failed:0};
+let wStats = {total:0,sent:0,failed:0};
+let selectedGroups = new Set();
+let allTemplates = [];
+let editingTplId = null;
+
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  try {
+    const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) });
+    const d = await r.json();
+    if (d.success) {
+      TOKEN = d.token;
+      localStorage.setItem('mf_token', TOKEN);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('userLabel').textContent = username;
+      init();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  } catch(e) { toast('Server offline', 'error'); }
+}
+
+function logout() {
+  TOKEN = ''; localStorage.removeItem('mf_token');
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function authHdr() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN }; }
+
+async function init() {
+  testSMTP();
+  loadStats();
+  loadTemplates();
+  loadEmailLogs();
+  loadWALogs();
+  loadSchedulerJobs();
+  emailSSE();
+  waSSE();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (TOKEN) {
+    fetch('/api/me', { headers: authHdr() })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('userLabel').textContent = d.user;
+          init();
+        }
+      }).catch(() => {});
+  }
+});
+
+function goPage(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('nav-'+id)?.classList.add('active');
+  document.getElementById('page-'+id)?.classList.add('active');
+  if (id === 'stats') loadStats();
+  if (id === 'groups') loadGroups();
+  if (id === 'scheduler') { loadSchedulerJobs(); populateJobTemplates(); }
+  if (id === 'templates') loadTemplates();
+  window.scrollTo(0, 0); // Reset scroll on page change
+}
+
+function emailSSE() {
+  const es = new EventSource('/api/events');
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.type === 'start') {
+      eStats = {total:d.total,sent:0,failed:0};
+      document.getElementById('emailProg').style.display = 'block';
+      set('eT',d.total); set('eL',d.total);
+      sendingEmail = true; disBtn('emailSendBtn',true,'Sending...');
+    }
+    if (d.type === 'log') {
+      if (d.log.status==='sent') eStats.sent++; else eStats.failed++;
+      set('eS',eStats.sent); set('eF',eStats.failed);
+      if (d.progress!=null){ pct('emailFill',d.progress,d.total); set('emailProgLabel',d.progress+'/'+d.total); set('eL',d.total-d.progress); }
+      prependRow('emailLog', emailRow(d.log), 'emailLog');
+    }
+    if (d.type === 'done') {
+      sendingEmail=false; disBtn('emailSendBtn',false,'🚀 Initialize Campaign');
+      pct('emailFill',1,1); set('eL',0);
+      toast(`Campaign Complete! ${eStats.sent} sent.`, eStats.failed?'error':'success');
+      loadStats();
+    }
+  };
+}
+
+function waSSE() {
+  const es = new EventSource('/api/wa/events');
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.type==='status'||d.type==='qr') updateWAUI(d.status, d.qr);
+    if (d.type==='wa_start') {
+      wStats={total:d.total,sent:0,failed:0};
+      document.getElementById('waProg').style.display = 'block';
+      set('wT',d.total); set('wL',d.total);
+      sendingWA=true; disBtn('waSendBtn',true,'Processing...');
+    }
+    if (d.type==='wa_log') {
+      if (d.log.status==='sent') wStats.sent++; else wStats.failed++;
+      set('wS',wStats.sent); set('wF',wStats.failed);
+      if (d.progress!=null){ pct('waFill',d.progress,d.total); set('waProgLabel',d.progress+'/'+d.total); set('wL',d.total-d.progress); }
+      prependRow('waLog', waRow(d.log), 'waLog');
+    }
+    if (d.type==='wa_done') {
+      sendingWA=false; disBtn('waSendBtn',false,'💬 Start Broadcast');
+      pct('waFill',1,1); set('wL',0);
+      toast(`Done! ${wStats.sent} sent.`, wStats.failed?'error':'wa');
+      loadStats();
+    }
+  };
+}
+
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats', { headers: authHdr() });
+    const d = await r.json();
+    if (!d.success) return;
+    const o = d.overview;
+    set('sTotalSent', o.totalEmailsSent);
+    set('sTotalFailed', o.totalEmailsFailed);
+    set('sWASent', o.totalWASent);
+    set('sWAFailed', o.totalWAFailed);
+    renderMiniChart('chartEmailSent', d.last7.map(x=>x.emailSent), 'email');
+    renderMiniChart('chartEmailFailed', d.last7.map(x=>x.emailFailed), 'failed');
+    renderMiniChart('chartWASent', d.last7.map(x=>x.waSent), 'wa');
+    renderMiniChart('chartWAFailed', d.last7.map(x=>x.waFailed), 'failed');
+  } catch(e) {}
+}
+
+function renderMiniChart(id, vals, type) {
+  const el = document.getElementById(id); if (!el) return;
+  const max = Math.max(...vals, 1);
+  el.innerHTML = vals.map(v => {
+    const h = Math.max(2, Math.round((v/max)*40));
+    const color = type==='wa' ? 'var(--wa)' : type==='failed' ? 'var(--error)' : 'var(--accent)';
+    return `<div style="flex:1;height:${h}px;background:${color};border-radius:2px;opacity:0.8" title="${v}"></div>`;
+  }).join('');
+}
+
+async function loadTemplates() {
+  try {
+    const r = await fetch('/api/templates', { headers: authHdr() });
+    const d = await r.json();
+    if (!d.success) return;
+    allTemplates = d.templates;
+    renderTplList();
+    populateEmailTplSelect();
+    populateJobTemplates();
+  } catch(e) {}
+}
+
+function renderTplList() {
+  const el = document.getElementById('tplList');
+  if (!allTemplates.length) { el.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem">No templates saved.</div>'; return; }
+  el.innerHTML = allTemplates.map(t => `
+    <div style="padding:12px; background:rgba(255,255,255,0.03); border:1px solid ${editingTplId===t.id?'var(--accent)':'var(--border)'}; border-radius:10px; cursor:pointer" onclick="editTpl(${t.id})">
+      <div style="font-weight:600; font-size:0.9rem">${esc(t.name)}</div>
+      <div style="font-size:0.75rem; color:var(--text-muted)">${esc(t.subject||'No subject')}</div>
+    </div>`).join('');
+}
+
+function editTpl(id) {
+  const t = allTemplates.find(x => x.id===id); if (!t) return;
+  editingTplId = id;
+  document.getElementById('tplName').value = t.name;
+  document.getElementById('tplSubject').value = t.subject||'';
+  document.getElementById('tplMessage').value = t.message||'';
+  document.getElementById('deleteTplBtn').style.display = id===1 ? 'none' : 'block';
+  renderTplList();
+}
+
+function newTemplate() {
+  editingTplId = null;
+  document.getElementById('tplName').value = '';
+  document.getElementById('tplSubject').value = '';
+  document.getElementById('tplMessage').value = '';
+  document.getElementById('deleteTplBtn').style.display = 'none';
+  renderTplList();
+}
+
+async function saveTplEdit() {
+  const name = document.getElementById('tplName').value.trim();
+  const subject = document.getElementById('tplSubject').value.trim();
+  const message = document.getElementById('tplMessage').value.trim();
+  if (!name||!subject||!message) { toast('Required fields missing', 'error'); return; }
+  try {
+    let r;
+    if (editingTplId) {
+      r = await fetch(`/api/templates/${editingTplId}`, { method:'PUT', headers:authHdr(), body:JSON.stringify({name,subject,message}) });
+    } else {
+      r = await fetch('/api/templates', { method:'POST', headers:authHdr(), body:JSON.stringify({name,subject,message}) });
+    }
+    const d = await r.json();
+    if (d.success) { toast('Saved!','success'); loadTemplates(); editingTplId = d.template.id; }
+  } catch(e) { toast('Save failed','error'); }
+}
+
+async function deleteTemplate() {
+  if (!editingTplId || editingTplId===1) return;
+  if (!confirm('Delete template?')) return;
+  const r = await fetch(`/api/templates/${editingTplId}`, { method:'DELETE', headers:authHdr() });
+  const d = await r.json();
+  if (d.success) { toast('Deleted','success'); editingTplId=null; loadTemplates(); newTemplate(); }
+}
+
+function populateEmailTplSelect() {
+  const sel = document.getElementById('emailTplSelect');
+  sel.innerHTML = allTemplates.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  loadSelectedTemplate();
+}
+
+function loadSelectedTemplate() {
+  const id = parseInt(document.getElementById('emailTplSelect').value);
+  const t = allTemplates.find(x=>x.id===id);
+  if (t) {
+    document.getElementById('subject').value = t.subject||'';
+    document.getElementById('message').value = t.message||'';
+  }
+}
+
+function populateJobTemplates() {
+  const sel = document.getElementById('jobTemplate');
+  if (!sel) return;
+  sel.innerHTML = allTemplates.map(t => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+}
+
+async function saveTemplate() {
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const id = parseInt(document.getElementById('emailTplSelect').value);
+  const r = await fetch(`/api/templates/${id}`, { method:'PUT', headers:authHdr(), body:JSON.stringify({subject,message}) });
+  const d = await r.json();
+  if (d.success) { toast('Updated!','success'); document.getElementById('tplSaved').style.display='inline'; loadTemplates(); }
+}
+
+async function handleCSV(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('csv', file);
+  const r = await fetch('/api/parse-csv', { method:'POST', body:fd });
+  const d = await r.json();
+  if (d.success) {
+    const el = document.getElementById('emailList');
+    el.value = el.value.trim() ? el.value.trim()+'\n'+d.emails.join('\n') : d.emails.join('\n');
+    updateCount('email'); toast(`Imported ${d.emails.length}`,'success');
+  }
+}
+
+function updateCount(type) {
+  if (type==='email') {
+    const n = parseList(document.getElementById('emailList').value).length;
+    const b = document.getElementById('emailCount');
+    b.textContent=n; b.style.display=n?'inline-block':'none';
+  } else {
+    const n = parseList(document.getElementById('waNumbers').value).length;
+    const b = document.getElementById('numCount');
+    b.textContent=n; b.style.display=n?'inline-block':'none';
+  }
+}
+
+async function sendEmails() {
+  if (sendingEmail) return;
+  const emails = parseList(document.getElementById('emailList').value);
+  const templateId = parseInt(document.getElementById('emailTplSelect').value);
+  if (!emails.length) { toast('No recipients','error'); return; }
+  const r = await fetch('/api/send', { method:'POST', headers:authHdr(), body:JSON.stringify({emails,templateId}) });
+}
+
+async function loadEmailLogs() {
+  try {
+    const r = await fetch('/api/logs', { headers:authHdr() });
+    const d = await r.json();
+    renderLog('emailLog', d.logs, emailRow);
+    renderLog('statsEmailLog', (d.logs||[]).slice(0,5), emailRow);
+  } catch(e){}
+}
+
+async function clearEmailLogs() {
+  if (!confirm('Clear logs?')) return;
+  await fetch('/api/logs',{method:'DELETE',headers:authHdr()});
+  loadEmailLogs();
+}
+
+function updateWAUI(status, qr) {
+  const txt=document.getElementById('waTxt');
+  const img=document.getElementById('qrImg');
+  const imgContainer=document.getElementById('qrImgContainer');
+  const ph=document.getElementById('qrPh');
+  const instr=document.getElementById('waInstr');
+  const connBtn=document.getElementById('waConnBtn');
+  const discBtn=document.getElementById('waDiscBtn');
+  const badge=document.getElementById('waBadge');
+  
+  txt.textContent=status||'disconnected';
+  badge.className = 'badge ' + (status==='ready'?'sent':status==='qr'?'failed':'disabled');
+
+  if (status==='qr'&&qr) {
+    img.src=qr; imgContainer.style.display='inline-block'; ph.style.display='none';
+    instr.style.display='block'; connBtn.style.display='none'; discBtn.style.display='inline-flex';
+  } else if (status==='ready') {
+    imgContainer.style.display='none'; instr.style.display='none';
+    ph.style.display='flex'; ph.innerHTML='<div style="font-size:2rem; color:var(--wa)">✅</div><strong>Device Linked</strong>';
+    connBtn.style.display='none'; discBtn.style.display='inline-flex';
+  } else {
+    imgContainer.style.display='none'; instr.style.display='none';
+    ph.style.display='flex'; ph.innerHTML='<div style="font-size:2rem">📱</div><strong>Not Linked</strong>';
+    connBtn.style.display='inline-flex'; discBtn.style.display='none';
+  }
+}
+
+async function waConnect() { toast('Waking engine...','wa'); await fetch('/api/wa/connect',{method:'POST'}); }
+async function waDisconnect() { await fetch('/api/wa/disconnect',{method:'POST'}); }
+
+async function sendWA() {
+  if (sendingWA) return;
+  const numbers=parseList(document.getElementById('waNumbers').value);
+  const message=document.getElementById('waMsg').value.trim();
+  if (!numbers.length||!message) return;
+  const sr=await fetch('/api/wa/status');
+  const sd=await sr.json();
+  if (sd.status!=='ready') { toast('Connect WA First','error'); return; }
+  await fetch('/api/wa/send',{method:'POST',headers:authHdr(),body:JSON.stringify({numbers,message})});
+}
+
+async function loadWALogs() {
+  try {
+    const r=await fetch('/api/wa/logs',{headers:authHdr()});
+    const d=await r.json();
+    renderLog('waLog',d.logs,waRow);
+    renderLog('statsWALog',(d.logs||[]).slice(0,5),waRow);
+  } catch(e){}
+}
+
+async function clearWALogs() {
+  if(!confirm('Clear logs?'))return;
+  await fetch('/api/wa/logs',{method:'DELETE',headers:authHdr()});
+  loadWALogs();
+}
+
+async function loadGroups() {
+  const el=document.getElementById('groupList');
+  el.innerHTML='<div style="color:var(--text-muted)">Querying groups...</div>';
+  try {
+    const r=await fetch('/api/wa/groups');
+    const d=await r.json();
+    if (!d.success){el.innerHTML=`Error: ${d.error}`;return;}
+    el.innerHTML=d.groups.map(g=>`
+      <div style="padding:10px; border:1px solid ${selectedGroups.has(g.id)?'var(--wa)':'var(--border)'}; border-radius:8px; margin-bottom:5px; cursor:pointer" onclick="toggleGroup('${g.id}',this)">
+        <div style="font-weight:600; font-size:0.85rem">${esc(g.name)}</div>
+        <div style="font-size:0.7rem; color:var(--text-muted)">${g.participants} Members</div>
+      </div>`).join('');
+    updateGroupSelected();
+  } catch(e){el.innerHTML='Offline';}
+}
+
+function toggleGroup(id, el) {
+  if (selectedGroups.has(id)) { selectedGroups.delete(id); }
+  else { selectedGroups.add(id); }
+  loadGroups();
+}
+
+function updateGroupSelected() {
+  const el=document.getElementById('groupSelected');
+  el.textContent=selectedGroups.size?`${selectedGroups.size} groups selected`:'None';
+}
+
+async function sendToGroups() {
+  const message=document.getElementById('groupMsg').value.trim();
+  if (!selectedGroups.size||!message) return;
+  await fetch('/api/wa/send-group',{method:'POST',headers:authHdr(),body:JSON.stringify({groupIds:[...selectedGroups],message})});
+}
+
+async function loadSchedulerJobs() {
+  try {
+    const r=await fetch('/api/scheduler',{headers:authHdr()});
+    const d=await r.json();
+    const el=document.getElementById('jobList');
+    if (!d.jobs.length){el.innerHTML='No active schedules';return;}
+    el.innerHTML=d.jobs.map(j=>`
+      <div style="padding:1rem; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-weight:700">${esc(j.name)} <span class="badge ${j.enabled?'enabled':'disabled'}">${j.type}</span></div>
+          <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted)">${j.cron}</div>
+        </div>
+        <div style="display:flex; gap:5px">
+          <button class="btn btn-ghost" style="padding:4px 8px; font-size:0.7rem" onclick="toggleJob(${j.id},${!j.enabled})">${j.enabled?'Pause':'Resume'}</button>
+          <button class="btn btn-danger" style="padding:4px 8px; font-size:0.7rem" onclick="deleteJob(${j.id})">✕</button>
+        </div>
+      </div>`).join('');
+  } catch(e){}
+}
+
+async function addJob() {
+  const name=document.getElementById('jobName').value.trim();
+  const type=document.getElementById('jobType').value;
+  const cron=document.getElementById('jobCron').value.trim();
+  const templateId=parseInt(document.getElementById('jobTemplate').value);
+  const recipients=parseList(document.getElementById('jobRecipients').value);
+  await fetch('/api/scheduler',{method:'POST',headers:authHdr(),body:JSON.stringify({name,type,cron,templateId,recipients})});
+  loadSchedulerJobs();
+}
+
+async function toggleJob(id, enabled) {
+  await fetch(`/api/scheduler/${id}`,{method:'PUT',headers:authHdr(),body:JSON.stringify({enabled})});
+  loadSchedulerJobs();
+}
+
+async function deleteJob(id) {
+  await fetch(`/api/scheduler/${id}`,{method:'DELETE',headers:authHdr()});
+  loadSchedulerJobs();
+}
+
+async function testSMTP() {
+  const label = document.getElementById('smtpLabel');
+  if(label) label.textContent='CHECKING...';
+  try {
+    const r=await fetch('/api/test-smtp');
+    const d=await r.json();
+    const dot=document.getElementById('smtpDot');
+    if (d.success){dot.className='sdot ok'; if(label) label.textContent='SMTP READY';}
+    else{dot.className='sdot err'; if(label) label.textContent='SMTP ERROR';}
+  } catch(e){if(label) label.textContent='OFFLINE';}
+}
+
+function renderLog(id, logs, rowFn) {
+  const c=document.getElementById(id); if (!c) return;
+  if (!logs||!logs.length){c.innerHTML='<div style="padding:2rem; text-align:center; color:var(--text-muted)">Queue empty</div>';return;}
+  c.innerHTML=`<table><thead><tr><th>Address</th><th>Status</th><th>Error</th><th>Time</th></tr></thead><tbody>${logs.map(rowFn).join('')}</tbody></table>`;
+}
+
+function prependRow(containerId, html, tableBodyId) {
+  const c=document.getElementById(containerId); if (!c) return;
+  let tbody=c.querySelector('tbody');
+  if (!tbody){renderLog(containerId,[],emailRow); return;}
+  const tr=document.createElement('tr'); tr.innerHTML=html; tbody.insertBefore(tr,tbody.firstChild);
+}
+
+function emailRow(l) {
+  return `<td>${esc(l.email)}</td><td><span class="badge ${l.status}">${l.status}</span></td><td style="color:var(--text-muted)">${l.error?esc(l.error):'—'}</td><td style="color:var(--text-muted)">${new Date(l.sentAt).toLocaleTimeString()}</td>`;
+}
+function waRow(l) {
+  return `<td>+${esc(l.number)}</td><td><span class="badge ${l.status}">${l.status}</span></td><td style="color:var(--text-muted)">${l.error?esc(l.error):'—'}</td><td style="color:var(--text-muted)">${new Date(l.sentAt).toLocaleTimeString()}</td>`;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
+function pct(id,n,t){const e=document.getElementById(id);if(e)e.style.width=Math.round((n/t)*100)+'%'}
+function disBtn(id,off,label){const b=document.getElementById(id);if(!b)return;b.disabled=off;if(label)b.innerHTML=label}
+function parseList(raw){return raw.split(/[\n,;\s]+/).map(s=>s.trim()).filter(Boolean)}
+function toast(msg,type='info'){
+  const c=document.getElementById('toast');
+  const el=document.createElement('div');
+  el.className='tmsg '+type; el.textContent=msg;
+  c.appendChild(el); setTimeout(()=>el.remove(),4500);
+}
+</script>
+</body>
+</html>
